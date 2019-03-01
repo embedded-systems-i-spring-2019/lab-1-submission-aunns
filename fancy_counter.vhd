@@ -2,7 +2,7 @@
 -- Company: 
 -- Engineer: 
 -- 
--- Create Date: 02/21/2019 09:18:40 PM
+-- Create Date: 02/24/2019 01:31:59 PM
 -- Design Name: 
 -- Module Name: fancy_counter - Behavioral
 -- Project Name: 
@@ -21,10 +21,12 @@
 
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
+ use ieee.numeric_std.all;
+
 
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
-use IEEE.NUMERIC_STD.ALL;
+--use IEEE.NUMERIC_STD.ALL;
 
 -- Uncomment the following library declaration if instantiating
 -- any Xilinx leaf cells in this code.
@@ -32,50 +34,63 @@ use IEEE.NUMERIC_STD.ALL;
 --use UNISIM.VComponents.all;
 
 entity fancy_counter is
-Port (clk: in std_logic;
-      clk_en: in std_logic;
-      dir: in std_logic;
-      ld, en: in std_logic;
-      rst: in std_logic;
-      updn: in std_logic;
-      val: in std_logic_vector(3 downto 0);
-      cnt: out std_logic_vector(3 downto 0));
+--  Port ( );
+    port( clk,clk_en,dir,en,ld,rst,updn: in std_logic;
+            val: in std_logic_vector(3 downto 0);
+            cnt: out std_logic_vector(3 downto 0));
 end fancy_counter;
 
 architecture Behavioral of fancy_counter is
-signal cnt_result: std_logic_vector(3 downto 0) := (others => '0');
-signal hold: std_logic_vector(3 downto 0) := (others => '0');
+signal value: std_logic_vector(3 downto 0);
+    signal counter : std_logic_vector(3 downto 0) := (others => '0');
+
+signal direction: std_logic:='0';
+
 begin
-    process(clk)
+
+process( en,rst)
     begin
-        if(rising_edge(clk)) then
-            if(rst = '1') then
-                cnt <= (others => '0');
-            end if;
-            if(clk_en = '1' and en = '1') then 
-                if(ld = '1') then 
-                    cnt_result <= val;
-                    hold <= cnt_result;
-                    cnt <= cnt_result;
-                end if;
-                if(updn = '1') then
-                    if(dir = '1') then 
-                        cnt_result <= std_logic_vector(unsigned(cnt_result) + 1);
-                        cnt <= cnt_result;
-                        if(cnt_result = hold) then
-                            cnt_result <= "0000";
-                        end if;
-                    else
-                        cnt_result <= std_logic_vector(unsigned(cnt_result) - 1);
-                        cnt <= cnt_result;
-                        if(cnt_result = "0000") then
-                            cnt_result <= hold;
-                            cnt <= cnt_result;
-                        end if;
+         if rst='1' then
+            cnt <="0000";
+          else 
+          
+         if en='1' then
+            if rising_edge (clk) then
+                if clk_en='1' then
+                    if ld='1' then
+                        value<=val;
                     end if;
-             end if;
+                        if updn='1' then
+                            direction<=dir;
+                            end if;
+                            if direction='1' then
+                                if ((counter) < value) then
+                        counter <= std_logic_vector(unsigned(counter) + 1);
+                        cnt<=counter;
+                                else 
+                                 counter <= (others => '0');
+                                 cnt<=counter;
+                                 
+                                end if;
+                           else
+                                if((counter) > "0000") then
+                        counter <= std_logic_vector(unsigned(counter) - 1);
+                        cnt<=counter;
+                                else 
+                                 counter<= value;
+                                 cnt<=counter;
+                              
+                                end if; 
+--                                cnt<=counter;
+                                    
+                             end if;     
+                    end if;                                        
+                end if; 
             end if;
         end if;
-    end process;
+            
+end process;
 
 end Behavioral;
+
+
